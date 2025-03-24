@@ -1,0 +1,75 @@
+
+.whiteboard {
+  position: fixed;
+  inset: 0;
+}
+
+.dashboard {
+  position: absolute;
+  right: 10;
+  top: 10;
+  background-color: var(--component);
+  padding: 20px;
+  border-radius: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.icon {
+  border: 1px black solid;
+  border-radius: 10px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.icon.selected {
+  border: 1px black solid;
+  border-radius: 10px;
+  padding: 3px;
+  cursor: pointer;
+  background-color: var(--selected);
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+}
+
+.line {
+  stroke: white;
+  stroke-width: 4;
+  cursor: pointer;
+}
+
+.arrowHead {
+  fill: white;
+  cursor: pointer;
+}
+
+.triangle {
+  stroke: white;
+  stroke-width: 2;
+  fill: var(--background);
+  cursor: pointer;
+}
+
+.circle {
+  stroke: white;
+  stroke-width: 2;
+  fill: var(--background);
+  cursor: pointer;
+}
+
+.ellipse {
+  stroke: white;
+  stroke-width: 2;
+  fill: var(--background);
+  cursor: pointer;
+}
+
+.rectangle {
+  stroke: white;
+  stroke-width: 2;
+  fill: var(--background);
+  cursor: pointer;
+}
