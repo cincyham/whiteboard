@@ -20,6 +20,7 @@ export default function Home() {
   const [end, setEnd] = useState<PositionObject | null>(null);
   const [lines, setLines] = useState<ShapeObject[]>([]);
   const [shape, setShape] = useState<Shapes>(Shapes.Line);
+  const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
 
   const whiteboardClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
     console.log("running click handler");
@@ -28,6 +29,14 @@ export default function Home() {
       setStart({ x: event.pageX, y: event.pageY });
     }
   };
+
+  const handleSelect = (shape: ShapeObject) => {
+    setSelectedShapes([...selectedShapes, shape.id]);
+  }
+
+  const handleDeselect = (shape: ShapeObject) => {
+    setSelectedShapes(selectedShapes.filter(id => id !== shape.id))
+  }
 
   const handleDeleteLine = (lineToDelete: ShapeObject) => {
     const newLines = lines.filter(line => line !== lineToDelete);
@@ -42,6 +51,7 @@ export default function Home() {
     const Component = shapeComponents[shape];
     const line: ShapeObject = {
       shape,
+      id: crypto.randomUUID(),
       x1: start.x,
       y1: start.y,
       x2: end.x,
@@ -71,7 +81,7 @@ export default function Home() {
         setEnd(null);
         setLines([
           ...lines,
-          { shape, x1: start.x, y1: start.y, x2: event.pageX, y2: event.pageY },
+          { shape, id: crypto.randomUUID(), x1: start.x, y1: start.y, x2: event.pageX, y2: event.pageY },
         ]);
       } else {
         console.log("removing");
@@ -127,13 +137,16 @@ export default function Home() {
         />
       </div>
       <svg className='svg'>
-        {lines.map((line, index) => {
-          const Component = shapeComponents[line.shape];
+        {lines.map((shape, index) => {
+          const Component = shapeComponents[shape.shape];
           return (
             <Component
-              line={line}
-              onClick={() => handleDeleteLine(line)}
+              line={shape}
+              onClick={handleSelect}
               key={index}
+              onClickAway={handleDeselect}
+              isSelected={selectedShapes.includes(shape.id)}
+              deleteShape={handleDeleteLine}
             />
           );
         })}

@@ -37,7 +37,14 @@
 
 .line {
   stroke: white;
+  outline: none;
   stroke-width: 4;
+  cursor: pointer;
+}
+
+.line.selected {
+  stroke: blue;
+  stroke-width: 10;
   cursor: pointer;
 }
 
