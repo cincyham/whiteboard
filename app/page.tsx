@@ -23,20 +23,18 @@ export default function Home() {
   const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
 
   const whiteboardClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log("running click handler");
     if (!start && !end) {
-      console.log("setting start");
       setStart({ x: event.pageX, y: event.pageY });
     }
   };
 
   const handleSelect = (shape: ShapeObject) => {
     setSelectedShapes([...selectedShapes, shape.id]);
-  }
+  };
 
   const handleDeselect = (shape: ShapeObject) => {
-    setSelectedShapes(selectedShapes.filter(id => id !== shape.id))
-  }
+    setSelectedShapes(selectedShapes.filter(id => id !== shape.id));
+  };
 
   const handleDeleteLine = (lineToDelete: ShapeObject) => {
     const newLines = lines.filter(line => line !== lineToDelete);
@@ -49,7 +47,7 @@ export default function Home() {
     shape: Shapes
   ) => {
     const Component = shapeComponents[shape];
-    const line: ShapeObject = {
+    const shapeObject: ShapeObject = {
       shape,
       id: crypto.randomUUID(),
       x1: start.x,
@@ -58,14 +56,31 @@ export default function Home() {
       y2: end.y,
     };
     return (
-      <Component line={line} onClick={() => handleDeleteLine(line)} key={1} />
+      <Component
+        shape={shapeObject}
+        onClick={() => handleDeleteLine(shapeObject)}
+        key={1}
+      />
     );
   };
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (start) {
-        console.log("setting end");
         setEnd({ x: event.clientX, y: event.clientY });
       }
     };
@@ -75,16 +90,21 @@ export default function Home() {
         Math.abs(event.pageX - start.x) > 5 &&
         Math.abs(event.pageY - start.y) > 5
       ) {
-        console.log("finishing up");
 
         setStart(null);
         setEnd(null);
         setLines([
           ...lines,
-          { shape, id: crypto.randomUUID(), x1: start.x, y1: start.y, x2: event.pageX, y2: event.pageY },
+          {
+            shape,
+            id: crypto.randomUUID(),
+            x1: start.x,
+            y1: start.y,
+            x2: event.pageX,
+            y2: event.pageY,
+          },
         ]);
       } else {
-        console.log("removing");
         setStart(null);
         setEnd(null);
       }
@@ -141,7 +161,7 @@ export default function Home() {
           const Component = shapeComponents[shape.shape];
           return (
             <Component
-              line={shape}
+              shape={shape}
               onClick={handleSelect}
               key={index}
               onClickAway={handleDeselect}

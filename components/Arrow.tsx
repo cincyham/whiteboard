@@ -1,14 +1,26 @@
 import { ShapeObject } from "@/types/line";
-import React from "react";
+import { ClickAwayListener } from "@mui/material";
+import { KeyboardEvent, useEffect, useRef } from "react";
 
 interface ArrowComponentProps {
-  line: ShapeObject;
+  shape: ShapeObject;
   onClick: Function;
-  index: number; // This should probably be 'key' passed down by React, but I'll leave it as is for now
+  index: number;
+  onClickAway: Function;
+  isSelected: boolean;
+  deleteShape: Function;
 }
 
-const Arrow: React.FC<ArrowComponentProps> = ({ line, onClick, index }) => {
-  const { x1, y1, x2, y2 } = line;
+const Arrow: React.FC<ArrowComponentProps> = ({
+  shape,
+  onClick,
+  index,
+  onClickAway,
+  isSelected,
+  deleteShape,
+}) => {
+  const ref = useRef<SVGLineElement>(null);
+  const { x1, y1, x2, y2 } = shape;
   const dx = x2 - x1;
   const dy = y2 - y1;
   const length = Math.sqrt(dx * dx + dy * dy); // Line length
@@ -37,27 +49,39 @@ const Arrow: React.FC<ArrowComponentProps> = ({ line, onClick, index }) => {
   const arrowX2 = newX2 - perpX;
   const arrowY2 = newY2 - perpY;
 
-  console.log(
-    JSON.stringify([
-      x1,
-      y1,
-      x2,
-      y2,
-      newX2,
-      newY2,
-      arrowX1,
-      arrowX2,
-      arrowY1,
-      arrowY2,
-      perpX,
-      perpY,
-    ])
-  );
+  const keyDownHandler = (event: KeyboardEvent<SVGLineElement>) => {
+    if (["Backspace", "Delete"].includes(event.key)) {
+      deleteShape(shape);
+    }
+  };
+
+  useEffect(() => {
+    if (isSelected && ref.current) {
+      ref.current.focus(); // Automatically focus when component loads
+    }
+  }, [isSelected]);
 
   return (
     <g key={index}>
+      {isSelected && (
+        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
+          <g className='selected' ref={ref} tabIndex={0} onKeyDown={keyDownHandler}>
+            <line
+              className='line selected'
+              x1={x1}
+              y1={y1}
+              x2={newX2}
+              y2={newY2}
+            />
+            <polygon
+              points={`${x2},${y2} ${arrowX1},${arrowY1} ${arrowX2},${arrowY2}`}
+              className='arrowHead selected'
+            />
+          </g>
+        </ClickAwayListener>
+      )}
       <line
-        onClick={() => onClick(line)}
+        onClick={() => onClick(shape)}
         className='line'
         x1={x1}
         y1={y1}
@@ -65,7 +89,7 @@ const Arrow: React.FC<ArrowComponentProps> = ({ line, onClick, index }) => {
         y2={newY2}
       />
       <polygon
-        onClick={() => onClick(line)}
+        onClick={() => onClick(shape)}
         points={`${x2},${y2} ${arrowX1},${arrowY1} ${arrowX2},${arrowY2}`}
         className='arrowHead'
       />

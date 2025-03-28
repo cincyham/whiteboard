@@ -3,7 +3,7 @@ import { ClickAwayListener } from "@mui/material";
 import { KeyboardEvent, useEffect, useRef } from "react";
 
 interface LineComponentProps {
-  line: ShapeObject;
+  shape: ShapeObject;
   onClick: Function;
   index: number;
   onClickAway: Function;
@@ -12,7 +12,7 @@ interface LineComponentProps {
 }
 
 const Line: React.FC<LineComponentProps> = ({
-  line,
+  shape,
   onClick,
   index,
   onClickAway,
@@ -20,17 +20,15 @@ const Line: React.FC<LineComponentProps> = ({
   deleteShape,
 }) => {
   const ref = useRef<SVGLineElement>(null);
-  const { x1, y1, x2, y2 } = line;
+  const { x1, y1, x2, y2 } = shape;
 
   const keyDownHandler = (event: KeyboardEvent<SVGLineElement>) => {
     if (['Backspace', 'Delete'].includes(event.key)) {
-      console.log('onKeyDown');
-      deleteShape(line);
+      deleteShape(shape);
     }
   }
 
   useEffect(() => {
-    console.log('isSelected:', isSelected);
     if (isSelected && ref.current) {
       ref.current.focus(); // Automatically focus when component loads
     }
@@ -39,12 +37,12 @@ const Line: React.FC<LineComponentProps> = ({
   return (
     <g key={index}>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(line)}>
+        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <line ref={ref} tabIndex={0} onKeyDown={keyDownHandler} className='line selected' x1={x1} y1={y1} x2={x2} y2={y2} />
         </ClickAwayListener>
       )}
       <line
-        onClick={() => onClick(line)}
+        onClick={() => onClick(shape)}
         className='line'
         x1={x1}
         y1={y1}
