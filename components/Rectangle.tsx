@@ -1,4 +1,4 @@
-import { ShapeObject } from "@/types/line";
+import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
 import { KeyboardEvent, useEffect, useRef } from "react";
 
@@ -19,20 +19,7 @@ const Rectangle: React.FC<RectangleComponentProps> = ({
   isSelected,
   deleteShape,
 }) => {
-  const ref = useRef<SVGLineElement>(null);
   const { x1, x2, y1, y2 } = shape;
-
-  const keyDownHandler = (event: KeyboardEvent<SVGLineElement>) => {
-    if (["Backspace", "Delete"].includes(event.key)) {
-      deleteShape(shape);
-    }
-  };
-
-  useEffect(() => {
-    if (isSelected && ref.current) {
-      ref.current.focus(); // Automatically focus when component loads
-    }
-  }, [isSelected]);
 
   let startX: number = x1;
   let startY: number = y1;
@@ -52,9 +39,6 @@ const Rectangle: React.FC<RectangleComponentProps> = ({
         <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g
             className='selected'
-            ref={ref}
-            tabIndex={0}
-            onKeyDown={keyDownHandler}
           >
             <rect
               height={Math.abs(height)}

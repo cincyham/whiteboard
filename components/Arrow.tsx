@@ -1,4 +1,4 @@
-import { ShapeObject } from "@/types/line";
+import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
 import { KeyboardEvent, useEffect, useRef } from "react";
 
@@ -19,7 +19,6 @@ const Arrow: React.FC<ArrowComponentProps> = ({
   isSelected,
   deleteShape,
 }) => {
-  const ref = useRef<SVGLineElement>(null);
   const { x1, y1, x2, y2 } = shape;
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -49,23 +48,11 @@ const Arrow: React.FC<ArrowComponentProps> = ({
   const arrowX2 = newX2 - perpX;
   const arrowY2 = newY2 - perpY;
 
-  const keyDownHandler = (event: KeyboardEvent<SVGLineElement>) => {
-    if (["Backspace", "Delete"].includes(event.key)) {
-      deleteShape(shape);
-    }
-  };
-
-  useEffect(() => {
-    if (isSelected && ref.current) {
-      ref.current.focus(); // Automatically focus when component loads
-    }
-  }, [isSelected]);
-
   return (
     <g key={index}>
       {isSelected && (
         <ClickAwayListener onClickAway={() => onClickAway(shape)}>
-          <g className='selected' ref={ref} tabIndex={0} onKeyDown={keyDownHandler}>
+          <g className='selected'>
             <line
               className='line selected'
               x1={x1}
