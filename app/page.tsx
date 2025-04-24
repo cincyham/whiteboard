@@ -10,7 +10,7 @@ import {
   Crop75,
 } from "@mui/icons-material";
 import { PositionObject } from "@/types/defaults";
-import { ShapeObject } from "@/types/line";
+import { ShapeObject } from "@/types/shape";
 import { Shapes } from "@/enums/shapeTypes";
 import { shapeComponents } from "@/enums/shapeTypes";
 import "./page.css";
@@ -18,20 +18,29 @@ import "./page.css";
 export default function Home() {
   const [start, setStart] = useState<PositionObject | null>(null);
   const [end, setEnd] = useState<PositionObject | null>(null);
-  const [lines, setLines] = useState<ShapeObject[]>([]);
+  const [shapes, setShapes] = useState<ShapeObject[]>([]);
   const [shape, setShape] = useState<Shapes>(Shapes.Line);
+  const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
+  const [isShiftHeld, setIsShiftHeld] = useState<boolean>(false);
 
   const whiteboardClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log("running click handler");
     if (!start && !end) {
-      console.log("setting start");
       setStart({ x: event.pageX, y: event.pageY });
     }
   };
 
-  const handleDeleteLine = (lineToDelete: ShapeObject) => {
-    const newLines = lines.filter(line => line !== lineToDelete);
-    setLines(newLines);
+  const handleSelect = (shape: ShapeObject) => {
+    setSelectedShapes([...selectedShapes, shape.id]);
+  };
+
+  const handleDeselect = (shapeToDeselect: ShapeObject) => {
+    if (!isShiftHeld) setSelectedShapes(selectedShapes.filter(id => id !== shapeToDeselect.id));
+  };
+
+  const handleDeleteShape = (shapeToDelete: ShapeObject) => {
+    const newShapes = shapes.filter(shape => shape.id !== shapeToDelete.id);
+    handleDeselect(shapeToDelete);
+    setShapes(newShapes);
   };
 
   const getActiveLine = (
@@ -40,22 +49,53 @@ export default function Home() {
     shape: Shapes
   ) => {
     const Component = shapeComponents[shape];
-    const line: ShapeObject = {
+    const shapeObject: ShapeObject = {
       shape,
+      id: crypto.randomUUID(),
       x1: start.x,
       y1: start.y,
       x2: end.x,
       y2: end.y,
     };
     return (
-      <Component line={line} onClick={() => handleDeleteLine(line)} key={1} />
+      <Component
+        shape={shapeObject}
+        onClick={() => handleDeleteShape(shapeObject)}
+        key={1}
+      />
     );
   };
+  
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.shiftKey) setIsShiftHeld(true);
+      if (['Backspace', 'Delete'].includes(event.key) && selectedShapes.length > 0) {
+        let newShapes = [...shapes];
+        selectedShapes.forEach(shapeID => {
+          
+          newShapes = newShapes.filter(shape => shape.id !== shapeID);
+
+        });
+        setShapes(newShapes)
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (!event.shiftKey) setIsShiftHeld(false);
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [selectedShapes, shapes]);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (start) {
-        console.log("setting end");
         setEnd({ x: event.clientX, y: event.clientY });
       }
     };
@@ -65,16 +105,21 @@ export default function Home() {
         Math.abs(event.pageX - start.x) > 5 &&
         Math.abs(event.pageY - start.y) > 5
       ) {
-        console.log("finishing up");
 
         setStart(null);
         setEnd(null);
-        setLines([
-          ...lines,
-          { shape, x1: start.x, y1: start.y, x2: event.pageX, y2: event.pageY },
+        setShapes([
+          ...shapes,
+          {
+            shape,
+            id: crypto.randomUUID(),
+            x1: start.x,
+            y1: start.y,
+            x2: event.pageX,
+            y2: event.pageY,
+          },
         ]);
       } else {
-        console.log("removing");
         setStart(null);
         setEnd(null);
       }
@@ -127,13 +172,16 @@ export default function Home() {
         />
       </div>
       <svg className='svg'>
-        {lines.map((line, index) => {
-          const Component = shapeComponents[line.shape];
+        {shapes.map((shape, index) => {
+          const Component = shapeComponents[shape.shape];
           return (
             <Component
-              line={line}
-              onClick={() => handleDeleteLine(line)}
+              shape={shape}
+              onClick={handleSelect}
               key={index}
+              onClickAway={handleDeselect}
+              isSelected={selectedShapes.includes(shape.id)}
+              deleteShape={handleDeleteShape}
             />
           );
         })}
