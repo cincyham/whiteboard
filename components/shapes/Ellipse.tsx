@@ -1,6 +1,5 @@
 import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
-import { KeyboardEvent, useEffect, useRef } from "react";
 
 interface EllipseComponentProps {
   shape: ShapeObject;
@@ -8,7 +7,6 @@ interface EllipseComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
-  deleteShape: Function;
 }
 
 const Ellipse: React.FC<EllipseComponentProps> = ({
@@ -17,7 +15,6 @@ const Ellipse: React.FC<EllipseComponentProps> = ({
   index,
   onClickAway,
   isSelected,
-  deleteShape,
 }) => {
   const { x1, y1, x2, y2 } = shape;
 

@@ -1,6 +1,5 @@
 import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
-import { KeyboardEvent, useEffect, useRef } from "react";
 
 interface LineComponentProps {
   shape: ShapeObject;
@@ -8,7 +7,7 @@ interface LineComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
-  deleteShape: Function;
+  onAdjustClick: (x: number, y: number, shape: ShapeObject) => void;
 }
 
 const Line: React.FC<LineComponentProps> = ({
@@ -17,15 +16,19 @@ const Line: React.FC<LineComponentProps> = ({
   index,
   onClickAway,
   isSelected,
-  deleteShape,
+  onAdjustClick,
 }) => {
   const { x1, y1, x2, y2 } = shape;
 
+
+  
   return (
     <g key={index}>
       {isSelected && (
         <ClickAwayListener onClickAway={() => onClickAway(shape)}>
-          <line className='line selected' x1={x1} y1={y1} x2={x2} y2={y2} />
+          <g>
+            <line className='line selected' x1={x1} y1={y1} x2={x2} y2={y2} />
+          </g>
         </ClickAwayListener>
       )}
       <line

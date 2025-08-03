@@ -1,6 +1,5 @@
 import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
-import { KeyboardEvent, useEffect, useRef } from "react";
 
 interface ArrowComponentProps {
   shape: ShapeObject;
@@ -17,7 +16,6 @@ const Arrow: React.FC<ArrowComponentProps> = ({
   index,
   onClickAway,
   isSelected,
-  deleteShape,
 }) => {
   const { x1, y1, x2, y2 } = shape;
   const dx = x2 - x1;

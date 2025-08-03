@@ -4,32 +4,6 @@
   inset: 0;
 }
 
-.dashboard {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  background-color: var(--component);
-  padding: 20px;
-  border-radius: 20px;
-  display: flex;
-  gap: 20px;
-}
-
-.icon {
-  border: 1px black solid;
-  border-radius: 10px;
-  padding: 3px;
-  cursor: pointer;
-}
-
-.icon.selected {
-  border: 1px black solid;
-  border-radius: 10px;
-  padding: 3px;
-  cursor: pointer;
-  background-color: var(--selected);
-}
-
 .svg {
   width: 100%;
   height: 100%;
@@ -80,9 +54,20 @@
   outline: none;
 }
 
+.rectangle.surround {
+  fill: transparent;
+}
+
 .selected {
   stroke: blue;
   stroke-width: 10;
   cursor: pointer;
   outline: none;
+}
+
+.selected-adjust-circle {
+  stroke: lightblue;
+  stroke-width: 3;
+  fill: var(--foreground);
+  cursor: pointer;
 }

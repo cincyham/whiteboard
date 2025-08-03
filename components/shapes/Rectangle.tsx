@@ -1,6 +1,5 @@
 import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
-import { KeyboardEvent, useEffect, useRef } from "react";
 
 interface RectangleComponentProps {
   shape: ShapeObject;
@@ -8,7 +7,6 @@ interface RectangleComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
-  deleteShape: Function;
 }
 
 const Rectangle: React.FC<RectangleComponentProps> = ({
@@ -17,7 +15,6 @@ const Rectangle: React.FC<RectangleComponentProps> = ({
   index,
   onClickAway,
   isSelected,
-  deleteShape,
 }) => {
   const { x1, x2, y1, y2 } = shape;
 
