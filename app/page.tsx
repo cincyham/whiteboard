@@ -1,18 +1,10 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import {
-  HorizontalRule,
-  ArrowRightAlt,
-  ChangeHistory,
-  RadioButtonUnchecked,
-  NightlightRound,
-  Clear,
-  Crop75,
-} from "@mui/icons-material";
+import { useEffect, useState } from "react";
 import { PositionObject } from "@/types/defaults";
 import { ShapeObject } from "@/types/shape";
 import { Shapes, shapeComponents } from "@/enums/shapeTypes";
 import "./page.css";
+import Dashboard from "@/components/Dashboard";
 
 export default function Home() {
   const [start, setStart] = useState<PositionObject | null>(null);
@@ -22,7 +14,7 @@ export default function Home() {
   const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
   const [isShiftHeld, setIsShiftHeld] = useState<boolean>(false);
 
-  console.log('selectedShapes', selectedShapes);
+  console.log("selectedShapes", selectedShapes);
 
   const whiteboardClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!start && !end && selectedShapes.length === 0) {
@@ -40,7 +32,7 @@ export default function Home() {
 
   const handleSelect = (shape: ShapeObject) => {
     if (isShiftHeld) setSelectedShapes([...selectedShapes, shape.id]);
-    else setSelectedShapes([shape.id])
+    else setSelectedShapes([shape.id]);
   };
 
   const handleDeselect = (shapeToDeselect: ShapeObject) => {
@@ -68,12 +60,74 @@ export default function Home() {
       x2: end.x,
       y2: end.y,
     };
-    return (
-      <Component
-        shape={shapeObject}
-        key={1}
-      />
-    );
+    return <Component shape={shapeObject} key={1} />;
+  };
+
+  const getSelectedAdjustCircle = () => {
+    if (selectedShapes.length <= 0) return null;
+
+    if (selectedShapes.length === 1) {
+      const selectedShape = shapes.find(shp => shp.id === selectedShapes[0]);
+      if (!selectedShape) {
+        setSelectedShapes([]);
+        return;
+      }
+      return (
+        <circle
+          onMouseDown={() =>
+            onAdjustClickHandler(
+              selectedShape.x1,
+              selectedShape.y1,
+              selectedShape
+            )
+          }
+          className='selected-adjust-circle'
+          cx={selectedShape.x2}
+          cy={selectedShape.y2}
+          r={6}
+        />
+      );
+    } else {
+      let x1: number = 0;
+      let y1: number = 0;
+      let x2: number = 0;
+      let y2: number = 0;
+      const selectedShapeObjects = shapes.filter(shp => selectedShapes.includes(shp.id));
+      selectedShapeObjects.forEach(shp => {
+        if (!x1 || shp.x1 < x1) x1 = shp.x1;
+        if (!y1 || shp.y1 < y1) y1 = shp.y1;
+        if (!x2 || shp.x2 > x2) x2 = shp.x2;
+        if (!y2 || shp.y2 > y2) y2 = shp.y2;
+      });
+      let startX: number = x1;
+      let startY: number = y1;
+
+      const height = y2 - y1;
+      const width = x2 - x1;
+      if (width < 0) {
+        startX = x2;
+      }
+      if (height < 0) {
+        startY = y2;
+      }
+      return (
+        <g>
+          <rect
+            height={Math.abs(height)}
+            width={Math.abs(width)}
+            x={startX}
+            y={startY}
+            className='rectangle surround'
+          />
+          <circle
+            className='selected-adjust-circle'
+            cx={x2}
+            cy={y2}
+            r={6}
+          />
+        </g>
+      )
+    }
   };
 
   useEffect(() => {
@@ -83,7 +137,9 @@ export default function Home() {
         ["Backspace", "Delete"].includes(event.key) &&
         selectedShapes.length > 0
       ) {
-        const newShapes = shapes.filter(shape => !selectedShapes.includes(shape.id));
+        const newShapes = shapes.filter(
+          shape => !selectedShapes.includes(shape.id)
+        );
         setShapes(newShapes);
         setSelectedShapes([]);
       }
@@ -151,36 +207,7 @@ export default function Home() {
 
   return (
     <div onMouseDown={whiteboardClickHandler} className='whiteboard'>
-      <div className='dashboard'>
-        <HorizontalRule
-          onClick={() => setShape(Shapes.Line)}
-          className={`icon ${shape === Shapes.Line ? "selected" : ""}`}
-        />
-        <ArrowRightAlt
-          onClick={() => setShape(Shapes.Arrow)}
-          className={`icon ${shape === Shapes.Arrow ? "selected" : ""}`}
-        />
-        <ChangeHistory
-          onClick={() => setShape(Shapes.Triangle)}
-          className={`icon ${shape === Shapes.Triangle ? "selected" : ""}`}
-        />
-        <RadioButtonUnchecked
-          onClick={() => setShape(Shapes.Circle)}
-          className={`icon ${shape === Shapes.Circle ? "selected" : ""}`}
-        />
-        <NightlightRound
-          onClick={() => setShape(Shapes.Ellipse)}
-          className={`icon ${shape === Shapes.Ellipse ? "selected" : ""}`}
-        />
-        <Clear
-          onClick={() => setShape(Shapes.X)}
-          className={`icon ${shape === Shapes.X ? "selected" : ""}`}
-        />
-        <Crop75
-          onClick={() => setShape(Shapes.Rectangle)}
-          className={`icon ${shape === Shapes.Rectangle ? "selected" : ""}`}
-        />
-      </div>
+      <Dashboard shape={shape} setShape={setShape} />
       <svg className='svg'>
         {shapes.map((shape, index) => {
           const Component = shapeComponents[shape.shape];
@@ -197,6 +224,7 @@ export default function Home() {
             />
           );
         })}
+        {getSelectedAdjustCircle()}
         {start && end && getActiveLine(start, end, shape)}
       </svg>
     </div>

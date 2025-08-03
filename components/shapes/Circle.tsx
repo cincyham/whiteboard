@@ -1,30 +1,30 @@
 import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
-import { KeyboardEvent, useEffect, useRef } from "react";
 
-interface TriangleComponentProps {
+interface CircleComponentProps {
   shape: ShapeObject;
   onClick: Function;
   index: number;
   onClickAway: Function;
   isSelected: boolean;
-  isOnlySelected: boolean;
-  deleteShape: Function;
 }
 
-const Triangle: React.FC<TriangleComponentProps> = ({
+const Circle: React.FC<CircleComponentProps> = ({
   shape,
   onClick,
   index,
   onClickAway,
   isSelected,
-  isOnlySelected,
-  deleteShape,
 }) => {
   const { x1, y1, x2, y2 } = shape;
 
-  const x3 = -(x2 - x1) + x1;
-  const y3 = y2;
+  const rx = Math.abs((x2 - x1) / 2);
+  const ry = Math.abs((y2 - y1) / 2);
+
+  const radius = (rx + ry) / 2;
+
+  const cx = (x2 + x1) / 2;
+  const cy = (y2 + y1) / 2;
 
   return (
     <g>
@@ -33,22 +33,24 @@ const Triangle: React.FC<TriangleComponentProps> = ({
           <g
             className='selected'
           >
-            <polygon
-              key={index}
-              points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
-              className='triangle selected'
+            <circle
+              className='circle selected'
+              r={radius}
+              cx={cx}
+              cy={cy}
             />
           </g>
         </ClickAwayListener>
       )}
-      <polygon
+      <circle
         onClick={() => onClick(shape)}
-        key={index}
-        points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
-        className='triangle'
+        className='circle'
+        r={radius}
+        cx={cx}
+        cy={cy}
       />
     </g>
   );
 };
 
-export default Triangle;
+export default Circle;

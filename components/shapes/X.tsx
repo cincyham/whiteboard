@@ -1,6 +1,5 @@
 import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
-import { KeyboardEvent, useEffect, useRef } from "react";
 
 interface XComponentProps {
   shape: ShapeObject;
@@ -9,7 +8,6 @@ interface XComponentProps {
   onClickAway: Function;
   isSelected: boolean;
   isOnlySelected: boolean;
-  deleteShape: Function;
 }
 
 const X: React.FC<XComponentProps> = ({
@@ -18,8 +16,6 @@ const X: React.FC<XComponentProps> = ({
   index,
   onClickAway,
   isSelected,
-  isOnlySelected,
-  deleteShape,
 }) => {
 
   const { x1, x2, y1, y2 } = shape;

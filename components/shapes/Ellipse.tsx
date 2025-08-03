@@ -1,32 +1,25 @@
 import { ShapeObject } from "@/types/shape";
 import { ClickAwayListener } from "@mui/material";
-import { KeyboardEvent, useEffect, useRef } from "react";
 
-interface CircleComponentProps {
+interface EllipseComponentProps {
   shape: ShapeObject;
   onClick: Function;
   index: number;
   onClickAway: Function;
   isSelected: boolean;
-  isOnlySelected: boolean;
-  deleteShape: Function;
 }
 
-const Circle: React.FC<CircleComponentProps> = ({
+const Ellipse: React.FC<EllipseComponentProps> = ({
   shape,
   onClick,
   index,
   onClickAway,
   isSelected,
-  isOnlySelected,
-  deleteShape,
 }) => {
   const { x1, y1, x2, y2 } = shape;
 
   const rx = Math.abs((x2 - x1) / 2);
   const ry = Math.abs((y2 - y1) / 2);
-
-  const radius = (rx + ry) / 2;
 
   const cx = (x2 + x1) / 2;
   const cy = (y2 + y1) / 2;
@@ -38,19 +31,21 @@ const Circle: React.FC<CircleComponentProps> = ({
           <g
             className='selected'
           >
-            <circle
-              className='circle selected'
-              r={radius}
+            <ellipse
+              className='ellipse selected'
+              rx={rx}
+              ry={ry}
               cx={cx}
               cy={cy}
             />
           </g>
         </ClickAwayListener>
       )}
-      <circle
+      <ellipse
         onClick={() => onClick(shape)}
-        className='circle'
-        r={radius}
+        className='ellipse'
+        rx={rx}
+        ry={ry}
         cx={cx}
         cy={cy}
       />
@@ -58,4 +53,4 @@ const Circle: React.FC<CircleComponentProps> = ({
   );
 };
 
-export default Circle;
+export default Ellipse;
