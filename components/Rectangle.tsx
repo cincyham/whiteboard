@@ -8,6 +8,7 @@ interface RectangleComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
+  isOnlySelected: boolean;
   deleteShape: Function;
 }
 
@@ -17,6 +18,7 @@ const Rectangle: React.FC<RectangleComponentProps> = ({
   index,
   onClickAway,
   isSelected,
+  isOnlySelected,
   deleteShape,
 }) => {
   const { x1, x2, y1, y2 } = shape;

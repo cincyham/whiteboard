@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   HorizontalRule,
   ArrowRightAlt,
@@ -11,8 +11,7 @@ import {
 } from "@mui/icons-material";
 import { PositionObject } from "@/types/defaults";
 import { ShapeObject } from "@/types/shape";
-import { Shapes } from "@/enums/shapeTypes";
-import { shapeComponents } from "@/enums/shapeTypes";
+import { Shapes, shapeComponents } from "@/enums/shapeTypes";
 import "./page.css";
 
 export default function Home() {
@@ -23,18 +22,30 @@ export default function Home() {
   const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
   const [isShiftHeld, setIsShiftHeld] = useState<boolean>(false);
 
+  console.log('selectedShapes', selectedShapes);
+
   const whiteboardClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!start && !end) {
+    if (!start && !end && selectedShapes.length === 0) {
       setStart({ x: event.pageX, y: event.pageY });
     }
   };
 
+  const onAdjustClickHandler = (x: number, y: number, shape: ShapeObject) => {
+    if (!start && !end) {
+      setStart({ x, y });
+      setShape(shape.shape);
+      setShapes(oldShapes => oldShapes.filter(shp => shp.id !== shape.id));
+    }
+  };
+
   const handleSelect = (shape: ShapeObject) => {
-    setSelectedShapes([...selectedShapes, shape.id]);
+    if (isShiftHeld) setSelectedShapes([...selectedShapes, shape.id]);
+    else setSelectedShapes([shape.id])
   };
 
   const handleDeselect = (shapeToDeselect: ShapeObject) => {
-    if (!isShiftHeld) setSelectedShapes(selectedShapes.filter(id => id !== shapeToDeselect.id));
+    if (!isShiftHeld)
+      setSelectedShapes(selectedShapes.filter(id => id !== shapeToDeselect.id));
   };
 
   const handleDeleteShape = (shapeToDelete: ShapeObject) => {
@@ -60,29 +71,27 @@ export default function Home() {
     return (
       <Component
         shape={shapeObject}
-        onClick={() => handleDeleteShape(shapeObject)}
         key={1}
       />
     );
   };
-  
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.shiftKey) setIsShiftHeld(true);
-      if (['Backspace', 'Delete'].includes(event.key) && selectedShapes.length > 0) {
-        let newShapes = [...shapes];
-        selectedShapes.forEach(shapeID => {
-          
-          newShapes = newShapes.filter(shape => shape.id !== shapeID);
-
-        });
-        setShapes(newShapes)
+      setIsShiftHeld(event.shiftKey);
+      if (
+        ["Backspace", "Delete"].includes(event.key) &&
+        selectedShapes.length > 0
+      ) {
+        const newShapes = shapes.filter(shape => !selectedShapes.includes(shape.id));
+        setShapes(newShapes);
+        setSelectedShapes([]);
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      if (!event.shiftKey) setIsShiftHeld(false);
-    }
+      setIsShiftHeld(event.shiftKey);
+    };
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
@@ -102,10 +111,10 @@ export default function Home() {
     const handleMouseUp = (event: MouseEvent) => {
       if (
         start &&
-        Math.abs(event.pageX - start.x) > 5 &&
-        Math.abs(event.pageY - start.y) > 5
+        (selectedShapes.length > 1 ||
+          (Math.abs(event.pageX - start.x) > 5 &&
+            Math.abs(event.pageY - start.y) > 5))
       ) {
-
         setStart(null);
         setEnd(null);
         setShapes([
@@ -119,6 +128,7 @@ export default function Home() {
             y2: event.pageY,
           },
         ]);
+        setSelectedShapes([]);
       } else {
         setStart(null);
         setEnd(null);
@@ -174,14 +184,16 @@ export default function Home() {
       <svg className='svg'>
         {shapes.map((shape, index) => {
           const Component = shapeComponents[shape.shape];
+          const isSelected = selectedShapes.includes(shape.id);
           return (
             <Component
               shape={shape}
               onClick={handleSelect}
               key={index}
               onClickAway={handleDeselect}
-              isSelected={selectedShapes.includes(shape.id)}
-              deleteShape={handleDeleteShape}
+              isSelected={isSelected}
+              isOnlySelected={isSelected && selectedShapes.length === 1}
+              onAdjustClick={onAdjustClickHandler}
             />
           );
         })}

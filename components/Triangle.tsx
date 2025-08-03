@@ -8,6 +8,7 @@ interface TriangleComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
+  isOnlySelected: boolean;
   deleteShape: Function;
 }
 
@@ -17,6 +18,7 @@ const Triangle: React.FC<TriangleComponentProps> = ({
   index,
   onClickAway,
   isSelected,
+  isOnlySelected,
   deleteShape,
 }) => {
   const { x1, y1, x2, y2 } = shape;

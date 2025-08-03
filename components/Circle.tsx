@@ -8,6 +8,7 @@ interface CircleComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
+  isOnlySelected: boolean;
   deleteShape: Function;
 }
 
@@ -17,6 +18,7 @@ const Circle: React.FC<CircleComponentProps> = ({
   index,
   onClickAway,
   isSelected,
+  isOnlySelected,
   deleteShape,
 }) => {
   const { x1, y1, x2, y2 } = shape;

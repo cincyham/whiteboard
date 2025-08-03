@@ -8,6 +8,7 @@ interface EllipseComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
+  isOnlySelected: boolean;
   deleteShape: Function;
 }
 
@@ -17,6 +18,7 @@ const Ellipse: React.FC<EllipseComponentProps> = ({
   index,
   onClickAway,
   isSelected,
+  isOnlySelected,
   deleteShape,
 }) => {
   const { x1, y1, x2, y2 } = shape;

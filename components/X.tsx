@@ -8,6 +8,7 @@ interface XComponentProps {
   index: number;
   onClickAway: Function;
   isSelected: boolean;
+  isOnlySelected: boolean;
   deleteShape: Function;
 }
 
@@ -17,6 +18,7 @@ const X: React.FC<XComponentProps> = ({
   index,
   onClickAway,
   isSelected,
+  isOnlySelected,
   deleteShape,
 }) => {
 
