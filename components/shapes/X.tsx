@@ -1,22 +1,13 @@
-import { ShapeObject } from "@/types/shape";
+import { ShapeComponentProps } from "@/types/shapeTypes";
 import { ClickAwayListener } from "@mui/material";
 
-interface XComponentProps {
-  shape: ShapeObject;
-  onClick: Function;
-  index: number;
-  onClickAway: Function;
-  isSelected: boolean;
-  isOnlySelected: boolean;
-}
-
-const X: React.FC<XComponentProps> = ({
+export default function X ({
   shape,
   onClick,
   index,
   onClickAway,
-  isSelected,
-}) => {
+  isSelected = false,
+}: ShapeComponentProps) {
 
   const { x1, x2, y1, y2 } = shape;
 
@@ -63,5 +54,3 @@ const X: React.FC<XComponentProps> = ({
     </g>
   );
 };
-
-export default X;

@@ -1,20 +1,25 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PositionObject } from "@/types/defaults";
-import { ShapeObject } from "@/types/shape";
-import { Shapes, shapeComponents } from "@/enums/shapeTypes";
+import { BaseShape, ShapeElement, BaseShapeGroup } from "@/types/shapeTypes";
+import { Shapes, shapeComponents } from "@/types/shapeTypes";
 import "./page.css";
 import Dashboard from "@/components/Dashboard";
+import { ClickAwayListener } from "@mui/material";
+import ShapeGroup from "@/components/shapes/ShapeGroup";
 
 export default function Home() {
   const [start, setStart] = useState<PositionObject | null>(null);
   const [end, setEnd] = useState<PositionObject | null>(null);
-  const [shapes, setShapes] = useState<ShapeObject[]>([]);
+  const [shapes, setShapes] = useState<ShapeElement[]>([]);
   const [shape, setShape] = useState<Shapes>(Shapes.Line);
-  const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
+  const [selectedShapes, setSelectedShapes] = useState<ShapeElement[]>([]);
   const [isShiftHeld, setIsShiftHeld] = useState<boolean>(false);
 
-  console.log("selectedShapes", selectedShapes);
+  const selectedShapeIds = useMemo(
+    () => selectedShapes.map(shp => shp.id),
+    [selectedShapes]
+  );
 
   const whiteboardClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!start && !end && selectedShapes.length === 0) {
@@ -22,26 +27,30 @@ export default function Home() {
     }
   };
 
-  const onAdjustClickHandler = (x: number, y: number, shape: ShapeObject) => {
+  const onAdjustClickHandler = (x: number, y: number, shape: ShapeElement, event: React.MouseEvent<SVGCircleElement, MouseEvent>) => {
     if (!start && !end) {
       setStart({ x, y });
+      setEnd({ x: event.clientX, y: event.clientY });
       setShape(shape.shape);
       setShapes(oldShapes => oldShapes.filter(shp => shp.id !== shape.id));
+      setSelectedShapes(oldShapes => oldShapes.filter(shp => shp.id !== shape.id));
     }
   };
 
-  const handleSelect = (shape: ShapeObject) => {
-    if (isShiftHeld) setSelectedShapes([...selectedShapes, shape.id]);
-    else setSelectedShapes([shape.id]);
-  };
+  const handleSelect = useCallback((shape: ShapeElement) => {
+    if (isShiftHeld) setSelectedShapes(prev => [...prev, shape]);
+    else setSelectedShapes([shape]);
+  }, [isShiftHeld]);
 
-  const handleDeselect = (shapeToDeselect: ShapeObject) => {
+  const handleDeselect = useCallback((shapeToDeselect: ShapeElement) => {
     if (!isShiftHeld)
-      setSelectedShapes(selectedShapes.filter(id => id !== shapeToDeselect.id));
-  };
+      setSelectedShapes(
+        prev => prev.filter(shp => shp.id !== shapeToDeselect.id)
+      );
+  }, [isShiftHeld]);
 
-  const handleDeleteShape = (shapeToDelete: ShapeObject) => {
-    const newShapes = shapes.filter(shape => shape.id !== shapeToDelete.id);
+  const handleDeleteShape = (shapeToDelete: ShapeElement) => {
+    const newShapes = shapes.filter(shp => shp.id !== shapeToDelete.id);
     handleDeselect(shapeToDelete);
     setShapes(newShapes);
   };
@@ -52,7 +61,7 @@ export default function Home() {
     shape: Shapes
   ) => {
     const Component = shapeComponents[shape];
-    const shapeObject: ShapeObject = {
+    const ShapeType: BaseShape = {
       shape,
       id: crypto.randomUUID(),
       x1: start.x,
@@ -60,25 +69,26 @@ export default function Home() {
       x2: end.x,
       y2: end.y,
     };
-    return <Component shape={shapeObject} key={1} />;
+    return <Component shape={ShapeType} key={1} />;
   };
 
   const getSelectedAdjustCircle = () => {
     if (selectedShapes.length <= 0) return null;
 
-    if (selectedShapes.length === 1) {
-      const selectedShape = shapes.find(shp => shp.id === selectedShapes[0]);
+    if (selectedShapes.length === 1 && selectedShapes[0] instanceof BaseShape) {
+      const selectedShape = selectedShapes[0];
       if (!selectedShape) {
         setSelectedShapes([]);
         return;
       }
       return (
         <circle
-          onMouseDown={() =>
+          onMouseDown={(event: React.MouseEvent<SVGCircleElement, MouseEvent>) =>
             onAdjustClickHandler(
               selectedShape.x1,
               selectedShape.y1,
-              selectedShape
+              selectedShape,
+              event
             )
           }
           className='selected-adjust-circle'
@@ -87,46 +97,6 @@ export default function Home() {
           r={6}
         />
       );
-    } else {
-      let x1: number = 0;
-      let y1: number = 0;
-      let x2: number = 0;
-      let y2: number = 0;
-      const selectedShapeObjects = shapes.filter(shp => selectedShapes.includes(shp.id));
-      selectedShapeObjects.forEach(shp => {
-        if (!x1 || shp.x1 < x1) x1 = shp.x1;
-        if (!y1 || shp.y1 < y1) y1 = shp.y1;
-        if (!x2 || shp.x2 > x2) x2 = shp.x2;
-        if (!y2 || shp.y2 > y2) y2 = shp.y2;
-      });
-      let startX: number = x1;
-      let startY: number = y1;
-
-      const height = y2 - y1;
-      const width = x2 - x1;
-      if (width < 0) {
-        startX = x2;
-      }
-      if (height < 0) {
-        startY = y2;
-      }
-      return (
-        <g>
-          <rect
-            height={Math.abs(height)}
-            width={Math.abs(width)}
-            x={startX}
-            y={startY}
-            className='rectangle surround'
-          />
-          <circle
-            className='selected-adjust-circle'
-            cx={x2}
-            cy={y2}
-            r={6}
-          />
-        </g>
-      )
     }
   };
 
@@ -138,7 +108,7 @@ export default function Home() {
         selectedShapes.length > 0
       ) {
         const newShapes = shapes.filter(
-          shape => !selectedShapes.includes(shape.id)
+          shape => !selectedShapeIds.includes(shape.id)
         );
         setShapes(newShapes);
         setSelectedShapes([]);
@@ -175,14 +145,14 @@ export default function Home() {
         setEnd(null);
         setShapes([
           ...shapes,
-          {
+          new BaseShape({
             shape,
             id: crypto.randomUUID(),
             x1: start.x,
             y1: start.y,
             x2: event.pageX,
             y2: event.pageY,
-          },
+          }),
         ]);
         setSelectedShapes([]);
       } else {
@@ -205,25 +175,59 @@ export default function Home() {
     };
   }, [start]);
 
+  const shapeList = useMemo(
+    () =>
+      shapes.map((shape, index) => {
+        if (selectedShapeIds.includes(shape.id)) {
+          return null;
+        }
+        const Component = shapeComponents[shape.shape];
+        return (
+          <Component
+            shape={shape}
+            onClick={handleSelect}
+            key={index}
+            onClickAway={handleDeselect}
+          />
+        );
+      }),
+    [shapes, selectedShapeIds, handleSelect, handleDeselect]
+  );
+
   return (
     <div onMouseDown={whiteboardClickHandler} className='whiteboard'>
       <Dashboard shape={shape} setShape={setShape} />
       <svg className='svg'>
-        {shapes.map((shape, index) => {
+        {shapeList}
+        {selectedShapes.map((shape, index) => {
           const Component = shapeComponents[shape.shape];
-          const isSelected = selectedShapes.includes(shape.id);
+          const isSelected = selectedShapeIds.includes(shape.id);
           return (
-            <Component
-              shape={shape}
-              onClick={handleSelect}
+            <ClickAwayListener
               key={index}
-              onClickAway={handleDeselect}
-              isSelected={isSelected}
-              isOnlySelected={isSelected && selectedShapes.length === 1}
-              onAdjustClick={onAdjustClickHandler}
-            />
+              onClickAway={() => handleDeselect(shape)}
+            >
+              <g>
+                <Component
+                  shape={shape}
+                  onClick={handleSelect}
+                  key={index}
+                  onClickAway={handleDeselect}
+                  isSelected={isSelected}
+                />
+              </g>
+            </ClickAwayListener>
           );
         })}
+        {/* {selectedShapes.length > 0 && (
+          <ShapeGroup
+            shapes={selectedShapes}
+            onClick={() => null}
+            isSelected
+            onClickAway={handleDeselect}
+          />
+        )} */}
+        {/* ^  Starting code to make selected shapes group shapes */}
         {getSelectedAdjustCircle()}
         {start && end && getActiveLine(start, end, shape)}
       </svg>

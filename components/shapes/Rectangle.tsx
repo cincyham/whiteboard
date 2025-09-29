@@ -1,21 +1,13 @@
-import { ShapeObject } from "@/types/shape";
+import { ShapeComponentProps } from "@/types/shapeTypes";
 import { ClickAwayListener } from "@mui/material";
 
-interface RectangleComponentProps {
-  shape: ShapeObject;
-  onClick: Function;
-  index: number;
-  onClickAway: Function;
-  isSelected: boolean;
-}
-
-const Rectangle: React.FC<RectangleComponentProps> = ({
+export default function Rectangle ({
   shape,
   onClick,
   index,
   onClickAway,
-  isSelected,
-}) => {
+  isSelected = false,
+}: ShapeComponentProps) {
   const { x1, x2, y1, y2 } = shape;
 
   let startX: number = x1;
@@ -58,5 +50,3 @@ const Rectangle: React.FC<RectangleComponentProps> = ({
     </g>
   );
 };
-
-export default Rectangle;
