@@ -1,21 +1,10 @@
-import { ShapeObject } from "@/types/shape";
-import { ClickAwayListener } from "@mui/material";
+import { ShapeComponentProps } from "@/types/shapeTypes";
 
-interface EllipseComponentProps {
-  shape: ShapeObject;
-  onClick: Function;
-  index: number;
-  onClickAway: Function;
-  isSelected: boolean;
-}
-
-const Ellipse: React.FC<EllipseComponentProps> = ({
+export default function Ellipse ({
   shape,
   onClick,
-  index,
-  onClickAway,
-  isSelected,
-}) => {
+  isSelected = false,
+}: ShapeComponentProps) {
   const { x1, y1, x2, y2 } = shape;
 
   const rx = Math.abs((x2 - x1) / 2);
@@ -27,7 +16,6 @@ const Ellipse: React.FC<EllipseComponentProps> = ({
   return (
     <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g
             className='selected'
           >
@@ -39,7 +27,6 @@ const Ellipse: React.FC<EllipseComponentProps> = ({
               cy={cy}
             />
           </g>
-        </ClickAwayListener>
       )}
       <ellipse
         onClick={() => onClick(shape)}
@@ -52,5 +39,3 @@ const Ellipse: React.FC<EllipseComponentProps> = ({
     </g>
   );
 };
-
-export default Ellipse;

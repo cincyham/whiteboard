@@ -1,4 +1,4 @@
-import { Shapes } from "@/enums/shapeTypes";
+import { Shapes } from "@/types/shapeTypes";
 import {
   HorizontalRule,
   ArrowRightAlt,

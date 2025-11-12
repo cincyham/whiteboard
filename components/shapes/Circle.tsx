@@ -1,21 +1,10 @@
-import { ShapeObject } from "@/types/shape";
-import { ClickAwayListener } from "@mui/material";
+import { ShapeComponentProps } from "@/types/shapeTypes";
 
-interface CircleComponentProps {
-  shape: ShapeObject;
-  onClick: Function;
-  index: number;
-  onClickAway: Function;
-  isSelected: boolean;
-}
-
-const Circle: React.FC<CircleComponentProps> = ({
+export default function Circle ({
   shape,
   onClick,
-  index,
-  onClickAway,
-  isSelected,
-}) => {
+  isSelected = false,
+}: ShapeComponentProps) {
   const { x1, y1, x2, y2 } = shape;
 
   const rx = Math.abs((x2 - x1) / 2);
@@ -29,7 +18,6 @@ const Circle: React.FC<CircleComponentProps> = ({
   return (
     <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g
             className='selected'
           >
@@ -40,7 +28,6 @@ const Circle: React.FC<CircleComponentProps> = ({
               cy={cy}
             />
           </g>
-        </ClickAwayListener>
       )}
       <circle
         onClick={() => onClick(shape)}
@@ -52,5 +39,3 @@ const Circle: React.FC<CircleComponentProps> = ({
     </g>
   );
 };
-
-export default Circle;

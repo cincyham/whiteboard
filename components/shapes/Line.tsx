@@ -1,35 +1,20 @@
-import { ShapeObject } from "@/types/shape";
-import { ClickAwayListener } from "@mui/material";
+import { ShapeComponentProps } from "@/types/shapeTypes";
 
-interface LineComponentProps {
-  shape: ShapeObject;
-  onClick: Function;
-  index: number;
-  onClickAway: Function;
-  isSelected: boolean;
-  onAdjustClick: (x: number, y: number, shape: ShapeObject) => void;
-}
-
-const Line: React.FC<LineComponentProps> = ({
+export default function Line({
   shape,
   onClick,
-  index,
-  onClickAway,
-  isSelected,
-  onAdjustClick,
-}) => {
+  isSelected = false,
+}: ShapeComponentProps) {
   const { x1, y1, x2, y2 } = shape;
 
 
   
   return (
-    <g key={index}>
+    <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
-          <g>
-            <line className='line selected' x1={x1} y1={y1} x2={x2} y2={y2} />
-          </g>
-        </ClickAwayListener>
+        <g>
+          <line className='line selected' x1={x1} y1={y1} x2={x2} y2={y2} />
+        </g>
       )}
       <line
         onClick={() => onClick(shape)}
@@ -42,5 +27,3 @@ const Line: React.FC<LineComponentProps> = ({
     </g>
   );
 };
-
-export default Line;

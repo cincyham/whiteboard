@@ -1,29 +1,14 @@
-import { ShapeObject } from "@/types/shape";
-import { ClickAwayListener } from "@mui/material";
+import { ShapeComponentProps } from "@/types/shapeTypes";
 
-interface ArrowComponentProps {
-  shape: ShapeObject;
-  onClick: Function;
-  index: number;
-  onClickAway: Function;
-  isSelected: boolean;
-  deleteShape: Function;
-}
-
-const Arrow: React.FC<ArrowComponentProps> = ({
+export default function Arrow({
   shape,
   onClick,
-  index,
-  onClickAway,
-  isSelected,
-}) => {
+  isSelected = false,
+}: ShapeComponentProps) {
   const { x1, y1, x2, y2 } = shape;
   const dx = x2 - x1;
   const dy = y2 - y1;
   const length = Math.sqrt(dx * dx + dy * dy); // Line length
-  if (length === 0) {
-    return;
-  }
   const arrowSize = 20; // Arrowhead length
   const arrowWidth = 20; // Arrowhead width
   const correctionFactor = 1; // Tiny correction to eliminate gap
@@ -47,9 +32,8 @@ const Arrow: React.FC<ArrowComponentProps> = ({
   const arrowY2 = newY2 - perpY;
 
   return (
-    <g key={index}>
+    <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g className='selected'>
             <line
               className='line selected'
@@ -63,7 +47,6 @@ const Arrow: React.FC<ArrowComponentProps> = ({
               className='arrowHead selected'
             />
           </g>
-        </ClickAwayListener>
       )}
       <line
         onClick={() => onClick(shape)}
@@ -81,5 +64,3 @@ const Arrow: React.FC<ArrowComponentProps> = ({
     </g>
   );
 };
-
-export default Arrow;

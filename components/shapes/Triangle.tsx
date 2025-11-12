@@ -1,21 +1,10 @@
-import { ShapeObject } from "@/types/shape";
-import { ClickAwayListener } from "@mui/material";
+import { ShapeComponentProps } from "@/types/shapeTypes";
 
-interface TriangleComponentProps {
-  shape: ShapeObject;
-  onClick: Function;
-  index: number;
-  onClickAway: Function;
-  isSelected: boolean;
-}
-
-const Triangle: React.FC<TriangleComponentProps> = ({
+export default function Triangle ({
   shape,
   onClick,
-  index,
-  onClickAway,
-  isSelected,
-}) => {
+  isSelected = false,
+}: ShapeComponentProps) {
   const { x1, y1, x2, y2 } = shape;
 
   const x3 = -(x2 - x1) + x1;
@@ -24,26 +13,20 @@ const Triangle: React.FC<TriangleComponentProps> = ({
   return (
     <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g
             className='selected'
           >
             <polygon
-              key={index}
               points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
               className='triangle selected'
             />
           </g>
-        </ClickAwayListener>
       )}
       <polygon
         onClick={() => onClick(shape)}
-        key={index}
         points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
         className='triangle'
       />
     </g>
   );
 };
-
-export default Triangle;
