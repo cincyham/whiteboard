@@ -81,7 +81,5 @@ export const shapeComponents: { [key in Shapes]: (props: any) => JSX.Element } =
 export type ShapeComponentProps = {
   shape: BaseShape;
   onClick: Function;
-  index: number;
   isSelected: boolean;
-  onClickAway: Function;
 };

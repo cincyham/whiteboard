@@ -1,11 +1,8 @@
 import { ShapeComponentProps } from "@/types/shapeTypes";
-import { ClickAwayListener } from "@mui/material";
 
 export default function Rectangle ({
   shape,
   onClick,
-  index,
-  onClickAway,
   isSelected = false,
 }: ShapeComponentProps) {
   const { x1, x2, y1, y2 } = shape;
@@ -23,9 +20,8 @@ export default function Rectangle ({
   }
 
   return (
-    <g key={index}>
+    <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g
             className='selected'
           >
@@ -37,7 +33,6 @@ export default function Rectangle ({
               className='rectangle selected'
             />
           </g>
-        </ClickAwayListener>
       )}
       <rect
         onClick={() => onClick(shape)}

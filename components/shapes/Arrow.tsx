@@ -1,11 +1,8 @@
 import { ShapeComponentProps } from "@/types/shapeTypes";
-import { ClickAwayListener } from "@mui/material";
 
 export default function Arrow({
   shape,
   onClick,
-  index,
-  onClickAway,
   isSelected = false,
 }: ShapeComponentProps) {
   const { x1, y1, x2, y2 } = shape;
@@ -35,9 +32,8 @@ export default function Arrow({
   const arrowY2 = newY2 - perpY;
 
   return (
-    <g key={index}>
+    <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g className='selected'>
             <line
               className='line selected'
@@ -51,7 +47,6 @@ export default function Arrow({
               className='arrowHead selected'
             />
           </g>
-        </ClickAwayListener>
       )}
       <line
         onClick={() => onClick(shape)}

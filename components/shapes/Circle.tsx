@@ -1,11 +1,8 @@
 import { ShapeComponentProps } from "@/types/shapeTypes";
-import { ClickAwayListener } from "@mui/material";
 
 export default function Circle ({
   shape,
   onClick,
-  index,
-  onClickAway,
   isSelected = false,
 }: ShapeComponentProps) {
   const { x1, y1, x2, y2 } = shape;
@@ -21,7 +18,6 @@ export default function Circle ({
   return (
     <g>
       {isSelected && (
-        <ClickAwayListener onClickAway={() => onClickAway(shape)}>
           <g
             className='selected'
           >
@@ -32,7 +28,6 @@ export default function Circle ({
               cy={cy}
             />
           </g>
-        </ClickAwayListener>
       )}
       <circle
         onClick={() => onClick(shape)}
