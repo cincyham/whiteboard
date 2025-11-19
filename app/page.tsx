@@ -4,7 +4,7 @@ import { PositionObject } from "@/types/defaults";
 import { BaseShape, ShapeElement, BaseShapeGroup } from "@/types/shapeTypes";
 import { Shapes, shapeComponents } from "@/types/shapeTypes";
 import "./page.scss";
-import Dashboard from "@/components/Dashboard";
+import Dashboard from "@/components/Dashboard/Dashboard";
 import { ClickAwayListener } from "@mui/material";
 import ShapeGroup from "@/components/shapes/ShapeGroup";
 
@@ -29,6 +29,7 @@ export default function Home() {
 
   const handleSelect = useCallback(
     (shape: ShapeElement) => {
+      console.log('shape', shape);
       if (isShiftHeld) setSelectedShapes(prev => [...prev, shape]);
       else setSelectedShapes([shape]);
       setShapes(prev => prev.filter(shp => shp.id !== shape.id));
@@ -36,10 +37,17 @@ export default function Home() {
     [isShiftHeld]
   );
 
-  const handleSelectedClickAway = useCallback(() => {
+  const handleClick = () => {
+    if (isShiftHeld || selectedShapes.length === 0) return;
     setShapes(prev => [...prev, ...selectedShapes]);
     setSelectedShapes([]);
-  }, [selectedShapes]);
+  };
+
+  const handleSelectedClickAway = (event: MouseEvent | TouchEvent) => {
+    if (isShiftHeld) return;
+    setShapes(prev => [...prev, ...selectedShapes]);
+    setSelectedShapes([]);
+  };
 
   // Handle Key Presses when Shapes are selected
   useEffect(() => {
@@ -146,23 +154,34 @@ export default function Home() {
   }, [start, end, shape]);
 
   return (
-    <div onMouseDown={whiteboardClickHandler} className='whiteboard'>
-      <Dashboard shape={shape} setShape={setShape} />
+    <div
+      onClick={handleClick}
+      onMouseDown={whiteboardClickHandler}
+      className='whiteboard'
+    >
+        <Dashboard
+          isSelected={selectedShapes.length > 0}
+          shape={shape}
+          setShape={setShape}
+        />
       <svg className='svg'>
-        <g style={{ pointerEvents: (selectedShapes.length > 0 && !isShiftHeld) ? 'none' : 'revert' }}>{shapeList}</g>
+        <g
+          style={{
+            pointerEvents:
+              selectedShapes.length > 0 && !isShiftHeld ? "none" : "revert",
+          }}
+        >
+          {shapeList}
+        </g>
         {selectedShapes.length > 0 && (
-          <ClickAwayListener
-            onClickAway={() => (isShiftHeld ? null : handleSelectedClickAway())}
-          >
-            <g>
-              <ShapeGroup
-                shapes={selectedShapes}
-                setShapes={setSelectedShapes}
-                onClick={() => null}
-                isSelected
-              />
-            </g>
-          </ClickAwayListener>
+          <g>
+            <ShapeGroup
+              shapes={selectedShapes}
+              setShapes={setSelectedShapes}
+              onClick={() => null}
+              isSelected
+            />
+          </g>
         )}
         {activeLine}
       </svg>

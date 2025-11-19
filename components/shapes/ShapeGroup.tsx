@@ -29,13 +29,9 @@ export default function ShapeGroup({
     if (newEnd && end) {
       const x2Change = newEnd.x - end.x;
       const y2Change = newEnd.y - end.y;
-      console.log('x2Change: ', x2Change);
-      console.log('y2Change: ', y2Change);
       const adjustShapeXYValues = (
         shape: BaseShape,
       ): BaseShape => {
-        console.log('shape.x2 + x2Change', shape.x2 + x2Change);
-        console.log('shape.y2 + y2Change', shape.y2 + y2Change);
         return new BaseShape({
           ...shape,
           x2: shape.x2 + x2Change,
@@ -93,7 +89,6 @@ export default function ShapeGroup({
     <>
     <g ref={ref}>
       {shapes.map((shape, index) => {
-        console.log('shape', shape);
         const Component = Array.isArray(shape)
           ? shapeComponents[Shapes.ShapeGroup]
           : shapeComponents[shape.shape];
