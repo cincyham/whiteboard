@@ -22,18 +22,8 @@ export default function Dashboard({
   setShape,
   isSelected,
 }: DashboardProps) {
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    // Allow color input to work normally
-    const target = event.target;
-    if (target instanceof HTMLElement && target.tagName === 'INPUT' && target.getAttribute('type') === 'color') {
-      event.stopPropagation();
-      return;
-    }
-    event.stopPropagation();
-    event.preventDefault();
-  };
   return (
-    <div onClick={handleClick} className={styles.dashboard}>
+    <div className={styles.dashboard}>
       <div className={styles.iconWrapper}>
         <HorizontalRule
           onClick={() => setShape(Shapes.Line)}
@@ -78,9 +68,6 @@ export default function Dashboard({
           }`}
         />
       </div>
-      {isSelected && <div>
-        <FormControlLabel label='Color:' labelPlacement="start" control={<input type='color' />} />
-        </div>}
     </div>
   );
 }

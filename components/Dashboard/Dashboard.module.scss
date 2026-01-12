@@ -1,9 +1,10 @@
 .dashboard {
   position: absolute;
-  right: 10px;
+  right: 50%;
   top: 10px;
+  transform: translateX(50%);
   background-color: var(--component);
-  padding: 20px;
+  padding: 10px;
   border-radius: 20px;
   display: flex;
   flex-direction: column;

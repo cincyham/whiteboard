@@ -83,7 +83,7 @@ export default function ShapeGroup({
         window.removeEventListener("mousemove", handleMouseMove);
       };
     }
-  }, [end, setNewShapes]);
+  }, [end]);
 
   return (
     <>

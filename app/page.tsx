@@ -4,9 +4,9 @@ import { PositionObject } from "@/types/defaults";
 import { BaseShape, ShapeElement, BaseShapeGroup } from "@/types/shapeTypes";
 import { Shapes, shapeComponents } from "@/types/shapeTypes";
 import "./page.scss";
-import Dashboard from "@/components/Dashboard/Dashboard";
-import { ClickAwayListener } from "@mui/material";
+import Dashboard from "@/components/Dashboard";
 import ShapeGroup from "@/components/shapes/ShapeGroup";
+import Selected from "@/components/Selected";
 
 export default function Home() {
   const [start, setStart] = useState<PositionObject | null>(null);
@@ -15,6 +15,8 @@ export default function Home() {
   const [shape, setShape] = useState<Shapes>(Shapes.Line);
   const [selectedShapes, setSelectedShapes] = useState<ShapeElement[]>([]);
   const [isShiftHeld, setIsShiftHeld] = useState<boolean>(false);
+
+  const showSelected = selectedShapes.length > 0;
 
   const selectedShapeIds = useMemo(
     () => new Set(selectedShapes.map(shp => shp.id)),
@@ -29,7 +31,7 @@ export default function Home() {
 
   const handleSelect = useCallback(
     (shape: ShapeElement) => {
-      console.log('shape', shape);
+      console.log("shape", shape);
       if (isShiftHeld) setSelectedShapes(prev => [...prev, shape]);
       else setSelectedShapes([shape]);
       setShapes(prev => prev.filter(shp => shp.id !== shape.id));
@@ -39,12 +41,6 @@ export default function Home() {
 
   const handleClick = () => {
     if (isShiftHeld || selectedShapes.length === 0) return;
-    setShapes(prev => [...prev, ...selectedShapes]);
-    setSelectedShapes([]);
-  };
-
-  const handleSelectedClickAway = (event: MouseEvent | TouchEvent) => {
-    if (isShiftHeld) return;
     setShapes(prev => [...prev, ...selectedShapes]);
     setSelectedShapes([]);
   };
@@ -154,17 +150,14 @@ export default function Home() {
   }, [start, end, shape]);
 
   return (
-    <div
-      onClick={handleClick}
-      onMouseDown={whiteboardClickHandler}
-      className='whiteboard'
-    >
-        <Dashboard
-          isSelected={selectedShapes.length > 0}
-          shape={shape}
-          setShape={setShape}
-        />
-      <svg className='svg'>
+    <div onMouseDown={whiteboardClickHandler} className='whiteboard'>
+      <Dashboard
+        isSelected={selectedShapes.length > 0}
+        shape={shape}
+        setShape={setShape}
+      />
+      <Selected hide={!showSelected} />
+      <svg onClick={handleClick} className='svg'>
         <g
           style={{
             pointerEvents:
@@ -173,15 +166,13 @@ export default function Home() {
         >
           {shapeList}
         </g>
-        {selectedShapes.length > 0 && (
-          <g>
-            <ShapeGroup
-              shapes={selectedShapes}
-              setShapes={setSelectedShapes}
-              onClick={() => null}
-              isSelected
-            />
-          </g>
+        {showSelected && (
+          <ShapeGroup
+            shapes={selectedShapes}
+            setShapes={setSelectedShapes}
+            onClick={() => null}
+            isSelected
+          />
         )}
         {activeLine}
       </svg>

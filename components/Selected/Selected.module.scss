@@ -1,0 +1,11 @@
+
+
+.selected {
+    position: absolute;
+    top: 10;
+    left: 10;
+    padding: 10px;
+    background-color: var(--component);
+    border-radius: 20px;
+    z-index: 1000;
+}
