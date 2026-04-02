@@ -15,6 +15,7 @@ export default function Home() {
   const [shape, setShape] = useState<Shapes>(Shapes.Line);
   const [selectedShapes, setSelectedShapes] = useState<ShapeElement[]>([]);
   const [isShiftHeld, setIsShiftHeld] = useState<boolean>(false);
+  const [selectedColor, setSelectedColor] = useState<string>('');
 
   const showSelected = selectedShapes.length > 0;
 
@@ -156,7 +157,7 @@ export default function Home() {
         shape={shape}
         setShape={setShape}
       />
-      <Selected hide={!showSelected} />
+      <Selected hide={!showSelected} selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
       <svg onClick={handleClick} className='svg'>
         <g
           style={{
