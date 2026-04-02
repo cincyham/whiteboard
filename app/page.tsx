@@ -4,9 +4,9 @@ import { PositionObject } from "@/types/defaults";
 import { BaseShape, ShapeElement, BaseShapeGroup } from "@/types/shapeTypes";
 import { Shapes, shapeComponents } from "@/types/shapeTypes";
 import "./page.scss";
-import Dashboard from "@/components/Dashboard";
+import Dashboard from "@/components/Dashboard/Dashboard";
 import ShapeGroup from "@/components/shapes/ShapeGroup";
-import Selected from "@/components/Selected";
+import Selected from "@/components/Selected/Selected";
 
 export default function Home() {
   const [start, setStart] = useState<PositionObject | null>(null);
