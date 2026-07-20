@@ -3,196 +3,138 @@
  *
  * Shows a proposed pattern to reduce boilerplate across shape components.
  * Every shape currently duplicates the selected/unselected rendering logic.
- * This file demonstrates two helpers that eliminate that duplication:
- *
- *   makeShape    — factory for single-element shapes (circle, rect, line, etc.)
- *   ShapeWrapper — render-prop wrapper for multi-element shapes (arrow, x)
+ * ShapeWrapper is a factory that handles selected state, onClick, and
+ * ShapeComponentProps for every shape — single or multi-element.
  */
 
-import { JSX, SVGAttributes } from "react";
+import { Children, cloneElement, isValidElement, ReactNode } from "react";
 import { BaseShape, ShapeComponentProps } from "@/types/shapeTypes";
 
 // ---------------------------------------------------------------------------
-// makeShape
+// ShapeWrapper
 // ---------------------------------------------------------------------------
-// Takes:
-//   cssClass     — the base CSS class string, e.g. "circle"
-//   computeAttrs — derives SVG attributes from the BaseShape coordinates
-//   renderEl     — renders the actual SVG element given merged attributes
-//
-// Returns a fully-formed React component with identical behaviour to today's
-// individual files, but with the selected/unselected branching handled once.
+// Pass a render function that receives coordinates and returns JSX.
+// ShapeWrapper produces a full React component — no prop declarations needed.
+// When isSelected, it renders a ghost copy with " selected" appended to every
+// element's className, then the interactive copy with onClick.
 
-function makeShape<TAttrs extends Omit<SVGAttributes<SVGElement>, "onClick">>(
-  cssClass: string,
-  computeAttrs: (shape: BaseShape) => TAttrs,
-  renderEl: (attrs: TAttrs & { className: string; onClick?: () => void }) => JSX.Element
-) {
+function addSelected(node: ReactNode): ReactNode {
+  return Children.map(node, (child) => {
+    if (!isValidElement<Record<string, unknown>>(child)) return child;
+    const props: Record<string, unknown> = {};
+    if (typeof child.props.className === "string") {
+      props.className = `${child.props.className} selected`;
+    }
+    if (child.props.children) {
+      props.children = addSelected(child.props.children as ReactNode);
+    }
+    return cloneElement(child, props);
+  });
+}
+
+function ShapeWrapper(render: (coords: BaseShape) => ReactNode) {
   return function Shape({ shape, onClick, isSelected = false }: ShapeComponentProps) {
-    const attrs = computeAttrs(shape);
+    const children = render(shape);
     return (
       <g>
-        {isSelected && renderEl({ ...attrs, className: `${cssClass} selected` })}
-        {renderEl({ ...attrs, className: cssClass, onClick: () => onClick(shape) })}
+        {isSelected && addSelected(children)}
+        <g onClick={() => onClick(shape)}>{children}</g>
       </g>
     );
   };
 }
 
 // ---------------------------------------------------------------------------
-// ShapeWrapper
-// ---------------------------------------------------------------------------
-// For shapes made of multiple SVG elements (Arrow, X), a render-prop wrapper
-// that calls children twice — once for the selected ghost, once for the real
-// interactive element — so you never write the branching by hand.
-
-type ShapeWrapperOpts = {
-  selected: boolean;
-  cls: (base: string) => string;
-};
-
-function ShapeWrapper({
-  isSelected,
-  children,
-}: {
-  isSelected: boolean;
-  children: (opts: ShapeWrapperOpts) => JSX.Element;
-}) {
-  const makeOpts = (selected: boolean): ShapeWrapperOpts => ({
-    selected,
-    cls: (base) => (selected ? `${base} selected` : base),
-  });
-
-  return (
-    <g>
-      {isSelected && children(makeOpts(true))}
-      {children(makeOpts(false))}
-    </g>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Circle  (was ~40 lines, now ~8)
+// Circle
 // ---------------------------------------------------------------------------
 
-const Circle = makeShape(
-  "circle",
-  ({ x1, y1, x2, y2 }) => {
-    const rx = Math.abs((x2 - x1) / 2);
-    const ry = Math.abs((y2 - y1) / 2);
-    return { r: (rx + ry) / 2, cx: (x2 + x1) / 2, cy: (y2 + y1) / 2 };
-  },
-  (attrs) => <circle {...attrs} />
-);
+const Circle = ShapeWrapper(({ x1, y1, x2, y2 }) => {
+  const rx = Math.abs((x2 - x1) / 2);
+  const ry = Math.abs((y2 - y1) / 2);
+  return <circle className="circle" r={(rx + ry) / 2} cx={(x2 + x1) / 2} cy={(y2 + y1) / 2} />;
+});
 
 // ---------------------------------------------------------------------------
-// Ellipse  (was ~40 lines, now ~8)
+// Ellipse
 // ---------------------------------------------------------------------------
 
-const Ellipse = makeShape(
-  "ellipse",
-  ({ x1, y1, x2, y2 }) => ({
-    rx: Math.abs((x2 - x1) / 2),
-    ry: Math.abs((y2 - y1) / 2),
-    cx: (x2 + x1) / 2,
-    cy: (y2 + y1) / 2,
-  }),
-  (attrs) => <ellipse {...attrs} />
-);
+const Ellipse = ShapeWrapper(({ x1, y1, x2, y2 }) => (
+  <ellipse
+    className="ellipse"
+    rx={Math.abs((x2 - x1) / 2)}
+    ry={Math.abs((y2 - y1) / 2)}
+    cx={(x2 + x1) / 2}
+    cy={(y2 + y1) / 2}
+  />
+));
 
 // ---------------------------------------------------------------------------
-// Rectangle  (was ~47 lines, now ~10)
+// Rectangle
 // ---------------------------------------------------------------------------
 
-const Rectangle = makeShape(
-  "rectangle",
-  ({ x1, y1, x2, y2 }) => ({
-    x: x2 < x1 ? x2 : x1,
-    y: y2 < y1 ? y2 : y1,
-    width: Math.abs(x2 - x1),
-    height: Math.abs(y2 - y1),
-  }),
-  (attrs) => <rect {...attrs} />
-);
+const Rectangle = ShapeWrapper(({ x1, y1, x2, y2 }) => (
+  <rect
+    className="rectangle"
+    x={x2 < x1 ? x2 : x1}
+    y={y2 < y1 ? y2 : y1}
+    width={Math.abs(x2 - x1)}
+    height={Math.abs(y2 - y1)}
+  />
+));
 
 // ---------------------------------------------------------------------------
-// Triangle  (was ~32 lines, now ~8)
+// Triangle
 // ---------------------------------------------------------------------------
 
-const Triangle = makeShape(
-  "triangle",
-  ({ x1, y1, x2, y2 }) => ({
-    points: `${x1},${y1} ${x2},${y2} ${-(x2 - x1) + x1},${y2}`,
-  }),
-  (attrs) => <polygon {...attrs} />
-);
+const Triangle = ShapeWrapper(({ x1, y1, x2, y2 }) => (
+  <polygon className="triangle" points={`${x1},${y1} ${x2},${y2} ${-(x2 - x1) + x1},${y2}`} />
+));
 
 // ---------------------------------------------------------------------------
-// Line  (was ~29 lines, now ~5)
+// Line
 // ---------------------------------------------------------------------------
 
-const Line = makeShape(
-  "line",
-  ({ x1, y1, x2, y2 }) => ({ x1, y1, x2, y2 }),
-  (attrs) => <line {...attrs} />
-);
+const Line = ShapeWrapper(({ x1, y1, x2, y2 }) => (
+  <line className="line" x1={x1} y1={y1} x2={x2} y2={y2} />
+));
 
 // ---------------------------------------------------------------------------
-// Arrow  — multi-element shape, uses ShapeWrapper instead
+// Arrow
 // ---------------------------------------------------------------------------
 
-function Arrow({ shape, onClick, isSelected = false }: ShapeComponentProps) {
-  const { x1, y1, x2, y2 } = shape;
+const Arrow = ShapeWrapper(({ x1, y1, x2, y2 }) => {
   const dx = x2 - x1;
   const dy = y2 - y1;
-  const length = Math.sqrt(dx * dx + dy * dy);
+  const len = Math.sqrt(dx * dx + dy * dy);
   const arrowSize = 20;
   const arrowWidth = 20;
-  const correctionFactor = 1;
-
-  const unitX = dx / length;
-  const unitY = dy / length;
-  const newX2 = x2 - unitX * (arrowSize - correctionFactor);
-  const newY2 = y2 - unitY * (arrowSize - correctionFactor);
+  const unitX = dx / len;
+  const unitY = dy / len;
+  const newX2 = x2 - unitX * (arrowSize - 1);
+  const newY2 = y2 - unitY * (arrowSize - 1);
   const perpX = -unitY * (arrowWidth / 2);
   const perpY = unitX * (arrowWidth / 2);
-  const arrowX1 = newX2 + perpX;
-  const arrowY1 = newY2 + perpY;
-  const arrowX2 = newX2 - perpX;
-  const arrowY2 = newY2 - perpY;
 
   return (
-    <ShapeWrapper isSelected={isSelected}>
-      {({ selected, cls }) => (
-        <g onClick={selected ? undefined : () => onClick(shape)}>
-          <line className={cls("line")} x1={x1} y1={y1} x2={newX2} y2={newY2} />
-          <polygon
-            className={cls("arrowHead")}
-            points={`${x2},${y2} ${arrowX1},${arrowY1} ${arrowX2},${arrowY2}`}
-          />
-        </g>
-      )}
-    </ShapeWrapper>
+    <>
+      <line className="line" x1={x1} y1={y1} x2={newX2} y2={newY2} />
+      <polygon
+        className="arrowHead"
+        points={`${x2},${y2} ${newX2 + perpX},${newY2 + perpY} ${newX2 - perpX},${newY2 - perpY}`}
+      />
+    </>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
-// X  — multi-element shape, uses ShapeWrapper instead
+// X
 // ---------------------------------------------------------------------------
 
-function XShape({ shape, onClick, isSelected = false }: ShapeComponentProps) {
-  const { x1, x2, y1, y2 } = shape;
+const XShape = ShapeWrapper(({ x1, x2, y1, y2 }) => (
+  <>
+    <line className="line" x1={x1} y1={y1} x2={x2} y2={y2} />
+    <line className="line" x1={x1} y1={y2} x2={x2} y2={y1} />
+  </>
+));
 
-  return (
-    <ShapeWrapper isSelected={isSelected}>
-      {({ selected, cls }) => (
-        <g onClick={selected ? undefined : () => onClick(shape)}>
-          <line className={cls("line")} x1={x1} y1={y1} x2={x2} y2={y2} />
-          <line className={cls("line")} x1={x1} y1={y2} x2={x2} y2={y1} />
-        </g>
-      )}
-    </ShapeWrapper>
-  );
-}
-
-export { Circle, Ellipse, Rectangle, Triangle, Line, Arrow, XShape, makeShape, ShapeWrapper };
+export { Circle, Ellipse, Rectangle, Triangle, Line, Arrow, XShape, ShapeWrapper };
