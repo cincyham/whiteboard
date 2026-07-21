@@ -1,27 +1,12 @@
-import Arrow from "@/components/shapes/Arrow";
-import Circle from "@/components/shapes/Circle";
-import Ellipse from "@/components/shapes/Ellipse";
-import Line from "@/components/shapes/Line";
-import Rectangle from "@/components/shapes/Rectangle";
+import { Arrow, Circle, Ellipse, Line, Rectangle, Triangle, XShape } from "@/components/shapes/shapes";
 import ShapeGroup from "@/components/shapes/ShapeGroup";
-import Triangle from "@/components/shapes/Triangle";
-import X from "@/components/shapes/X";
 import { JSX } from "react";
 
-type ShapeObject = {
-  shape: Shapes;
-  id: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+export type ShapeAppearance = {
+  stroke: string;
+  strokeWidth: number;
+  fill: string;
 };
-
-type ShapeGroupObject = {
-  shape: Shapes;
-  shapes: BaseShape[];
-  id: string;
-}
 
 export class BaseShape {
   shape: Shapes;
@@ -30,14 +15,20 @@ export class BaseShape {
   y1: number;
   x2: number;
   y2: number;
+  appearance: ShapeAppearance = {
+    stroke: "#ffffff",
+    strokeWidth: 4,
+    fill: "transparent",
+  };
 
-  constructor(obj: ShapeObject) {
-    this.shape = obj.shape;
-    this.id = obj.id;
-    this.x1 = obj.x1;
-    this.y1 = obj.y1;
-    this.x2 = obj.x2;
-    this.y2 = obj.y2;
+  constructor({ shape, id, x1, y1, x2, y2, appearance }: Omit<BaseShape, 'appearance'> & { appearance?: ShapeAppearance }) {
+    this.shape = shape;
+    this.id = id;
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+    if (appearance !== undefined) this.appearance = appearance;
   }
 }
 
@@ -46,10 +37,10 @@ export class BaseShapeGroup {
   shapes: BaseShape[];
   id: string;
 
-  constructor(obj: ShapeGroupObject) {
-    this.shape = obj.shape;
-    this.id = obj.id;
-    this.shapes = obj.shapes;
+  constructor({ shape, shapes, id }: Readonly<BaseShapeGroup>) {
+    this.shape = shape;
+    this.shapes = shapes;
+    this.id = id;
   }
 }
 
@@ -73,7 +64,7 @@ export const shapeComponents: { [key in Shapes]: (props: any) => JSX.Element } =
     [Shapes.Triangle]: Triangle,
     [Shapes.Circle]: Circle,
     [Shapes.Ellipse]: Ellipse,
-    [Shapes.X]: X,
+    [Shapes.X]: XShape,
     [Shapes.Rectangle]: Rectangle,
     [Shapes.ShapeGroup]: ShapeGroup,
   };
