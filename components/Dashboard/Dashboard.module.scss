@@ -1,0 +1,34 @@
+.dashboard {
+  position: absolute;
+  right: 50%;
+  top: 10px;
+  transform: translateX(50%);
+  background-color: var(--component);
+  padding: 10px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: black;
+}
+
+.iconWrapper {
+    display: flex;
+    color: white;
+  gap: 20px;
+}
+
+.icon {
+  border: 1px black solid;
+  border-radius: 10px;
+  padding: 3px;
+  cursor: pointer;
+
+  &.selected {
+    border: 1px black solid;
+    border-radius: 10px;
+    padding: 3px;
+    cursor: pointer;
+    background-color: var(--selected);
+  }
+}

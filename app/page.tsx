@@ -3,10 +3,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { PositionObject } from "@/types/defaults";
 import { BaseShape, ShapeElement, BaseShapeGroup } from "@/types/shapeTypes";
 import { Shapes, shapeComponents } from "@/types/shapeTypes";
-import "./page.scss";
-import Dashboard from "@/components/Dashboard";
-import { ClickAwayListener } from "@mui/material";
+import styles from "./page.module.scss";
+import '@/components/shapes/shapes.scss';
+import Dashboard from "@/components/Dashboard/Dashboard";
 import ShapeGroup from "@/components/shapes/ShapeGroup";
+import Selected from "@/components/Selected/Selected";
 
 export default function Home() {
   const [start, setStart] = useState<PositionObject | null>(null);
@@ -15,6 +16,7 @@ export default function Home() {
   const [shape, setShape] = useState<Shapes>(Shapes.Line);
   const [selectedShapes, setSelectedShapes] = useState<ShapeElement[]>([]);
   const [isShiftHeld, setIsShiftHeld] = useState<boolean>(false);
+  const showSelected = selectedShapes.length > 0;
 
   const selectedShapeIds = useMemo(
     () => new Set(selectedShapes.map(shp => shp.id)),
@@ -29,6 +31,7 @@ export default function Home() {
 
   const handleSelect = useCallback(
     (shape: ShapeElement) => {
+      console.log("shape", shape);
       if (isShiftHeld) setSelectedShapes(prev => [...prev, shape]);
       else setSelectedShapes([shape]);
       setShapes(prev => prev.filter(shp => shp.id !== shape.id));
@@ -36,10 +39,11 @@ export default function Home() {
     [isShiftHeld]
   );
 
-  const handleSelectedClickAway = useCallback(() => {
+  const handleClick = () => {
+    if (isShiftHeld || selectedShapes.length === 0) return;
     setShapes(prev => [...prev, ...selectedShapes]);
     setSelectedShapes([]);
-  }, [selectedShapes]);
+  };
 
   // Handle Key Presses when Shapes are selected
   useEffect(() => {
@@ -134,35 +138,41 @@ export default function Home() {
   const activeLine = useMemo(() => {
     if (!start || !end || typeof shape !== "number") return null;
     const Component = shapeComponents[shape];
-    const ShapeType: BaseShape = {
+    const ShapeType = new BaseShape({
       shape,
       id: crypto.randomUUID(),
       x1: start.x,
       y1: start.y,
       x2: end.x,
       y2: end.y,
-    };
+    });
     return <Component shape={ShapeType} key={1} />;
   }, [start, end, shape]);
 
   return (
-    <div onMouseDown={whiteboardClickHandler} className='whiteboard'>
-      <Dashboard shape={shape} setShape={setShape} />
-      <svg className='svg'>
-        <g style={{ pointerEvents: (selectedShapes.length > 0 && !isShiftHeld) ? 'none' : 'revert' }}>{shapeList}</g>
-        {selectedShapes.length > 0 && (
-          <ClickAwayListener
-            onClickAway={() => (isShiftHeld ? null : handleSelectedClickAway())}
-          >
-            <g>
-              <ShapeGroup
-                shapes={selectedShapes}
-                setShapes={setSelectedShapes}
-                onClick={() => null}
-                isSelected
-              />
-            </g>
-          </ClickAwayListener>
+    <div onMouseDown={whiteboardClickHandler} className={styles.whiteboard}>
+      <Dashboard
+        isSelected={selectedShapes.length > 0}
+        shape={shape}
+        setShape={setShape}
+      />
+      <Selected hide={!showSelected} selectedShapes={selectedShapes} setSelectedShapes={setSelectedShapes} />
+      <svg onClick={handleClick} className={styles.svg}>
+        <g
+          style={{
+            pointerEvents:
+              selectedShapes.length > 0 && !isShiftHeld ? "none" : "revert",
+          }}
+        >
+          {shapeList}
+        </g>
+        {showSelected && (
+          <ShapeGroup
+            shapes={selectedShapes}
+            setShapes={setSelectedShapes}
+            onClick={() => null}
+            isSelected
+          />
         )}
         {activeLine}
       </svg>

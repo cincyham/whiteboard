@@ -1,14 +1,3 @@
-
-.whiteboard {
-  position: fixed;
-  inset: 0;
-}
-
-.svg {
-  width: 100%;
-  height: 100%;
-}
-
 .line {
   stroke: white;
   outline: none;
@@ -56,13 +45,6 @@
 
 .rectangle.surround {
   fill: transparent;
-}
-
-.selected {
-  stroke: blue;
-  stroke-width: 10;
-  cursor: pointer;
-  outline: none;
 }
 
 .selected-adjust-circle {
