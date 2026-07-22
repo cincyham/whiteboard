@@ -19,11 +19,34 @@ function applyAppearance(node: ReactNode, appearance: BaseShape["appearance"]): 
   });
 }
 
+function applySelected(node: ReactNode, appearance: BaseShape["appearance"]): ReactNode {
+  return Children.map(node, (child) => {
+    if (!isValidElement<Record<string, unknown>>(child)) return child;
+    const props: Record<string, unknown> = {
+      style: {
+        fill: appearance.fill === "none" ? "none" : "transparent",
+        stroke: appearance.stroke === "none" ? "none" : "transparent",
+        strokeWidth: appearance.strokeWidth + 20,
+      },
+    };
+    if (child.props.children) {
+      props.children = applySelected(child.props.children as ReactNode, appearance);
+    }
+    return cloneElement(child, props);
+  });
+}
+
 function ShapeWrapper(render: (coords: BaseShape) => ReactNode) {
   return function Shape({ shape, onClick }: ShapeComponentProps) {
     const fullChildren = applyAppearance(render(shape), shape.appearance);
+    const hitArea = applySelected(fullChildren, shape.appearance);
     return (
-        <g onClick={() => onClick(shape)}>{fullChildren}</g>
+      <g>
+        {fullChildren}
+        <g onClick={() => onClick(shape)}>
+          {hitArea}
+        </g>
+      </g>
     );
   };
 }

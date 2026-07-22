@@ -1,4 +1,5 @@
 .selected {
+  width: 175px;
   position: absolute;
   top: 10px;
   left: 10px;
@@ -14,13 +15,13 @@
 .row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
 .label {
-  font-size: 0.8rem;
-  width: 40px;
   color: var(--foreground);
+  margin-right: 8px;
 }
 
 .transparentLabel {
@@ -34,4 +35,5 @@
 
 .widthInput {
   width: 56px;
+  height: 25px;
 }

@@ -41,9 +41,9 @@ export default function Selected({
 
     const appearance = first?.appearance;
     const stroke = appearance?.stroke ?? '#ffffff';
-    const fill = appearance?.fill ?? 'transparent';
+    const fill = appearance?.fill ?? 'none';
     const strokeWidth = appearance?.strokeWidth ?? 4;
-    const isTransparent = fill === 'transparent';
+    const isTransparent = fill === 'none';
 
     return (
         <div className={styles.selected}>
@@ -56,21 +56,23 @@ export default function Selected({
                 />
             </div>
             <div className={styles.row}>
-                <label className={styles.label}>Fill</label>
+                <div>
+                    <label className={styles.label}>Fill</label>
+                    <input
+                        type='checkbox'
+                        checked={!isTransparent}
+                        onChange={e =>
+                            update({
+                                fill: e.target.checked ? '#000000' : 'none',
+                            })
+                        }
+                    />
+                </div>
                 <input
                     type='color'
                     disabled={isTransparent}
                     value={isTransparent ? '#000000' : fill}
                     onChange={e => update({ fill: e.target.value })}
-                />
-                <input
-                    type='checkbox'
-                    checked={isTransparent}
-                    onChange={e =>
-                        update({
-                            fill: e.target.checked ? 'transparent' : '#000000',
-                        })
-                    }
                 />
             </div>
             <div className={styles.row}>

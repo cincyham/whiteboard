@@ -18,7 +18,7 @@ export class BaseShape {
   appearance: ShapeAppearance = {
     stroke: "#ffffff",
     strokeWidth: 4,
-    fill: "transparent",
+    fill: "none",
   };
 
   constructor({ shape, id, x1, y1, x2, y2, appearance }: Omit<BaseShape, 'appearance'> & { appearance?: ShapeAppearance }) {
